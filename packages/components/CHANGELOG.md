@@ -23,6 +23,7 @@
 -   `TimePicker`: Update unit tests to use `@testing-library/user-event` ([#41270](https://github.com/WordPress/gutenberg/pull/41270)).
 -   `DateTimePicker`: Update `moment` to 2.26.0 and update `react-date` typings ([#41266](https://github.com/WordPress/gutenberg/pull/41266)).
 -   `TextareaControl`: Convert to TypeScript ([#41215](https://github.com/WordPress/gutenberg/pull/41215)).
+-   `Autocomplete` updated to satisfy `react/exhuastive-deps` eslint rule ([#41382](https://github.com/WordPress/gutenberg/pull/41382))
 
 ### Experimental
 
