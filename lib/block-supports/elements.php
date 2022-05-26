@@ -89,13 +89,18 @@ function gutenberg_render_elements_support( $block_content, $block ) {
 function gutenberg_render_elements_support_styles( $pre_render, $block ) {
 	$block_type                    = WP_Block_Type_Registry::get_instance()->get_registered( $block['blockName'] );
 	$skip_link_color_serialization = gutenberg_should_skip_block_supports_serialization( $block_type, 'color', 'link' );
-	if ( $skip_link_color_serialization ) {
+	$skip_link_hover_color_serialization = gutenberg_should_skip_block_supports_serialization( $block_type, 'color', 'link:hover' );
+
+
+	if ( $skip_link_color_serialization && $skip_link_hover_color_serialization ) {
 		return null;
 	}
 
-	$link_color = null;
+	$link_color       = null;
+	$link_hover_color = null;
 	if ( ! empty( $block['attrs'] ) ) {
-		$link_color = _wp_array_get( $block['attrs'], array( 'style', 'elements', 'link', 'color', 'text' ), null );
+		$link_color       = _wp_array_get( $block['attrs'], array( 'style', 'elements', 'link', 'color', 'text' ), null );
+		$link_hover_color = _wp_array_get( $block['attrs'], array( 'style', 'elements', 'link:hover', 'color', 'text' ), null );
 	}
 
 	/*
@@ -104,25 +109,37 @@ function gutenberg_render_elements_support_styles( $pre_render, $block ) {
 	* should take advantage of WP_Theme_JSON_Gutenberg::compute_style_properties
 	* and work for any element and style.
 	*/
-	if ( null === $link_color ) {
+	if ( null === $link_color && null === $link_hover_color ) {
 		return null;
 	}
 
+	$style = '';
+
 	$class_name = gutenberg_get_elements_class_name( $block );
 
-	if ( strpos( $link_color, 'var:preset|color|' ) !== false ) {
-		// Get the name from the string and add proper styles.
-		$index_to_splice = strrpos( $link_color, '|' ) + 1;
-		$link_color_name = substr( $link_color, $index_to_splice );
-		$link_color      = "var(--wp--preset--color--$link_color_name)";
+	if ( ! empty( $link_color ) ) {
+		$style .= build_css_selector( $class_name, $link_color, 'a' );
 	}
-	$link_color_declaration = esc_html( safecss_filter_attr( "color: $link_color" ) );
 
-	$style = ".$class_name a{" . $link_color_declaration . ';}';
+	if ( ! empty( $link_hover_color ) ) {
+		$style .= build_css_selector( $class_name, $link_hover_color, 'a:hover' );
+	}
 
 	gutenberg_enqueue_block_support_styles( $style );
 
 	return null;
+}
+
+function build_css_selector( $class_name, $value, $selector ) {
+	if ( strpos( $value, 'var:preset|color|' ) !== false ) {
+		// Get the name from the string and add proper styles.
+		$index_to_splice = strrpos( $value, '|' ) + 1;
+		$name            = substr( $value, $index_to_splice );
+		$value           = "var(--wp--preset--color--$name)";
+	}
+	$declaration = esc_html( safecss_filter_attr( "color: $value" ) );
+
+	return ".$class_name $selector{" . $declaration . ';}';
 }
 
 // Remove WordPress core filters to avoid rendering duplicate elements stylesheet & attaching classes twice.
