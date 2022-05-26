@@ -75,7 +75,11 @@ function gutenberg_render_elements_support( $block_content, $block ) {
 }
 
 /**
- * Render the elements stylesheet.
+ * Renders the elements stylesheet for a given block type.
+ *
+ * Each block may have styles for it's child HTML elements (currently only a limited subset are supported).
+ * Render an inline <style> block scoped to the block's CSS selector containing all the `element` style
+ * rules for the block.
  *
  * In the case of nested blocks we want the parent element styles to be rendered before their descendants.
  * This solves the issue of an element (e.g.: link color) being styled in both the parent and a descendant:
